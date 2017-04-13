@@ -1,0 +1,3 @@
+flask
+flask_sqlalchemy
+-e git://github.com/theolind/pymysensors.git#egg=pymysensors
