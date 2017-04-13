@@ -7,3 +7,7 @@ from web import app
 def index():
     view = 'dashboard'
     return render_template("index.html", view=view)
+
+@app.route("/login")
+def login():
+    pass
