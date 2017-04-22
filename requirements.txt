@@ -1,4 +1,8 @@
 flask
+flask-cors
 flask_wtf
 flask_sqlalchemy
+influxdb
+influxalchemy
+PyYAML
 -e git://github.com/theolind/pymysensors.git#egg=pymysensors
