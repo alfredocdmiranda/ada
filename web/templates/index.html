@@ -20,3 +20,26 @@ Dashboard
 </section>
 <!-- /.content -->
 {% endblock %}
+
+{% block js %}
+<script>
+  $("[name='my-checkbox']").bootstrapSwitch();
+</script>
+<script src="{{ url_for('static', filename='cards.js') }}"></script>
+<script>
+  $.ajax({
+    url: "https://localhost:5001/nodes",
+    dataType: "json",
+
+    success: function(data){
+      build_dashboard(data);
+      load_bootstrapSwitch();
+    },
+
+    error: function(error, e){
+      alert("Data couldn't be retrieved");
+    }
+  });
+
+</script>
+{% endblock %}
