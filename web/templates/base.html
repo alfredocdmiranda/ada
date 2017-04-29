@@ -68,7 +68,7 @@
       <ul class="sidebar-menu">
         <li class="header">HEADER</li>
         <li id='dashboard'><a href="{{ url_for('index') }}"><i class="fa fa-area-chart"></i> <span>Dashboard</span></a></li>
-        <li id='nodes'><a href=""><i class="fa fa-sitemap"></i> <span>Nodes</span></a></li>
+        <li id='nodes'><a href="{{ url_for('nodes') }}"><i class="fa fa-sitemap"></i> <span>Nodes</span></a></li>
         <li class="treeview">
           <a href="#"><i class="fa fa-gear"></i> <span>System</span>
             <span class="pull-right-container">
@@ -76,11 +76,11 @@
             </span>
           </a>
           <ul class="treeview-menu">
-            <li id='status'><a href=""><i class="fa fa-bar-chart"></i>Status</a></li>
-            <li id='settings'><a href=""><i class="fa fa-sliders"></i>Settings</a></li>
+            <li id='status'><a href="{{ url_for('status') }}"><i class="fa fa-bar-chart"></i>Status</a></li>
+            <li id='settings'><a href="{{ url_for('settings') }}"><i class="fa fa-sliders"></i>Settings</a></li>
           </ul>
         </li>
-        <li><a href=""><i class="fa fa-sign-out"></i> <span>Logout</span></a></li>
+        <li><a href="{{ url_for('logout') }}"><i class="fa fa-sign-out"></i> <span>Logout</span></a></li>
       </ul>
       <!-- /.sidebar-menu -->
     </section>

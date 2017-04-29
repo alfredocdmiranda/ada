@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Content Header (Page header) -->
+<section class="content-header">
+  <h1>
+    Status
+    <!--<small>Optional description</small>-->
+  </h1>
+  <!--<ol class="breadcrumb">
+    <li><a href="#"><i class="fa fa-dashboard"></i> Level</a></li>
+    <li class="active">Here</li>
+  </ol>-->
+</section>
+
+<!-- Main content -->
+<section class="content">
+  <div class="row">
+    <div class="col-lg-6 col-xs-6">
+      <div class="box box-info">
+        <div class="box-header with-border">
+          <h3 class="box-title">System Info</h3>
+        </div>
+        <!-- /.box-header -->
+        <div class="box-body">
+          <dl class="dl-horizontal">
+            <dt>Operating System</dt>
+            <dd>Linux</dd>
+            <dt>Archtecture</dt>
+            <dd>amd64</dd>
+            <dt>Version/Kernel</dt>
+            <dd>2.6.32-573.12.1.el6.x86_64</dd>
+          </dl>
+        </div>
+        <!-- /.box-footer -->
+      </div>
+      <div class="box box-info">
+        <div class="box-header with-border">
+          <h3 class="box-title">ADA Info</h3>
+        </div>
+        <!-- /.box-header -->
+        <div class="box-body">
+          <dl class="dl-horizontal">
+            <dt>Version</dt>
+            <dd>0.0.1</dd>
+          </dl>
+        </div>
+        <!-- /.box-footer -->
+      </div>
+    </div>
+    <div class="col-lg-3 col-xs-6">
+      <!-- small box -->
+      <div class="small-box bg-orange">
+        <div class="inner">
+          <h3>63°C</h3>
+          <p>Server Temperature</p>
+        </div>
+        <div class="icon">
+          <i class="ion ion-thermometer"></i>
+        </div>
+        <!--<a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>-->
+      </div>
+      <!-- small box -->
+      <div class="small-box bg-red">
+        <div class="inner">
+          <h3>90%</h3>
+          <p>Usage Disk Space</p>
+        </div>
+        <div class="icon">
+          <i class="ion ion-pie-graph"></i>
+        </div>
+        <!--<a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>-->
+      </div>
+    </div>
+
+  </div>
+</section>
+<!-- /.content -->
+{% endblock %}
