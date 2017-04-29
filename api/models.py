@@ -12,7 +12,7 @@ class Settings(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     module_id = db.Column(db.Integer, db.ForeignKey('module.id'))
     module = db.relationship("Module", back_populates="settings")
-    settings = db.Column(db.JSON)
+    settings = db.Column(db.String)
 
 
 class Module(db.Model):

@@ -1,10 +1,13 @@
-from flask_restful import Resource, reqparse
+from flask_restful import Resource, reqparse, fields, marshal
 
-from api import app, api
+from api import app, api, auth
+from .models import User
 
-# parser = reqparse.RequestParser()
-# parser.add_argument('variable')
-# parser.add_argument('value')
+parser = reqparse.RequestParser()
+parser.add_argument('username', required=True)
+parser.add_argument('password', required=True)
+
+user_fields = {"id": fields.Integer, "name": fields.String, "email": fields.String}
 
 
 MOCK_NODES = [{"id": 1,
@@ -40,6 +43,7 @@ MOCK_NODES = [{"id": 1,
 
 
 class ApiNodesList(Resource):
+    @auth.jwt_required
     def get(self):
         nodes = MOCK_NODES
 
@@ -47,6 +51,7 @@ class ApiNodesList(Resource):
 
 
 class ApiNode(Resource):
+    @auth.jwt_required
     def get(self, node_id):
         if node_id == 1:
             node = MOCK_NODES[0]
@@ -56,28 +61,32 @@ class ApiNode(Resource):
 
 
 class ApiSensorsList(Resource):
+    @auth.jwt_required
     def get(self, node_id):
         if node_id == 1:
             node = MOCK_NODES[0]
         else:
             node = MOCK_NODES[1]
 
-        # children = []
-        # for i in node['children']:
-        #     # print(app.gateway.sensors[node_id].children[i].__dict__)
-        #     children.append({})
-        #     children[-1]["id"] = app.gateway.sensors[node_id].children[i].id
-        #     children[-1]["description"] = app.gateway.sensors[node_id].children[i].description
-        #     children[-1]["type"] = app.gateway.sensors[node_id].children[i].type
-        #     children[-1]["values"] = app.gateway.sensors[node_id].children[i].values
-
-        return node['children']
+        return node['sensors']
 
 
 class ApiSensor(Resource):
+    @auth.jwt_required
     def get(self, node_id, sensor_id):
-        return {'type': 3}
+        if node_id == 1:
+            node = MOCK_NODES[0]
+        else:
+            node = MOCK_NODES[1]
 
+        if sensor_id == 1:
+            sensor = node['sensors'][0]
+        else:
+            sensor = node['sensors'][1]
+
+        return sensor
+
+    @auth.jwt_required
     def put(self, node_id, sensor_id):
         args = parser.parse_args()
         # print("{};{};1;0;{};{}".format(node_id,sensor_id,args['variable'],args['value']))
@@ -87,14 +96,32 @@ class ApiSensor(Resource):
 
 
 class ApiSettings(Resource):
+    @auth.jwt_required
     def get(self):
         return {'gateway': {"port": "/dev/ttyACM0"}}
 
 
 class ApiStatus(Resource):
+    @auth.jwt_required
     def get(self):
         return {'server': {'temperature': 60, 'disk_usage': 90}}
 
+
+class ApiAuth(Resource):
+    def post(self):
+        args = parser.parse_args()
+        user = User.query.filter(User.email==args.username).first()
+        if user and args.password == user.password:
+            auth_token = auth.encode_auth_token(user.id)
+            return {'auth_token': auth_token.decode('utf-8')}
+        else:
+            return {'message': "Unauthorized"}, 401
+
+class ApiUserMe(Resource):
+    @auth.jwt_required
+    def get(self):
+        user = User.query.filter(User.id == payload).first()
+        return marshal(user, user_fields)
 
 api.add_resource(ApiNodesList, '/nodes')
 api.add_resource(ApiNode, '/nodes/<int:node_id>')
@@ -102,3 +129,5 @@ api.add_resource(ApiSensorsList, '/nodes/<int:node_id>/sensors')
 api.add_resource(ApiSensor, '/nodes/<int:node_id>/sensors/<int:sensor_id>')
 api.add_resource(ApiSettings, '/settings')
 api.add_resource(ApiStatus, '/status')
+api.add_resource(ApiAuth, '/auth')
+api.add_resource(ApiUserMe, '/users/me')
