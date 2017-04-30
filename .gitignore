@@ -90,3 +90,9 @@ ENV/
 
 # Pycharm's project folder
 .idea/
+
+# Project's files
+*.key
+*.crt
+*.db
+*.yaml
