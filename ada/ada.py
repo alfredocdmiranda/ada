@@ -4,7 +4,7 @@ import threading
 import yaml
 from OpenSSL import crypto
 
-import web, api, drivers
+import web, api, drivers, system_monitor
 
 SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_SQLITE_DB = os.path.join(SCRIPT_PATH, "ada.db")
@@ -92,15 +92,18 @@ if __name__ == '__main__':
     ada = Ada()
     bootstrap(ada)
     ada.db = api.db
-
+    api.app.ada = ada
     context = ('ada.crt', 'ada.key')
     kwargs = {'host': "0.0.0.0", 'port': 5000, 'ssl_context': context, 'threaded': True}
     ada.modules.append(Module("Web", web.app.run, kwargs))
     kwargs = {'host': "0.0.0.0", 'port': 5001, 'ssl_context': context, 'threaded': True}
     ada.modules.append(Module("Api", api.app.run, kwargs))
+
     d = drivers.DriverLoader(ada)
     d.load_drivers()
     d.start()
+
+    ada.sys_monitor = system_monitor.SystemMonitor(ada)
 
     for m in ada.modules:
         m.start()
