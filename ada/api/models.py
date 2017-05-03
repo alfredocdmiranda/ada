@@ -1,3 +1,6 @@
+import influxdb
+import influxalchemy
+
 from api import db
 
 
@@ -17,4 +20,10 @@ class Settings(db.Model):
 
 class Module(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, unique=True)
     settings = db.relationship("Settings", uselist=False, back_populates="module")
+    active = db.Column(db.Boolean)
+
+
+class Sensors(influxalchemy.Measurement):
+    __measurement__ = 'sensors'

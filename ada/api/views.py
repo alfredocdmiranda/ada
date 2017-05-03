@@ -1,14 +1,19 @@
+import json
+
 from flask_restful import Resource, reqparse, fields, marshal
 
-from api import app, api, auth
-from .models import User
+from api import app, api, auth, db
+from .models import User, Settings, Module
 
-parser = reqparse.RequestParser()
-parser.add_argument('username', required=True)
-parser.add_argument('password', required=True)
+login_parser = reqparse.RequestParser()
+login_parser.add_argument('username', required=True)
+login_parser.add_argument('password', required=True)
+
+settings_post_parser = reqparse.RequestParser()
+settings_post_parser.add_argument('module', required=True, type=str)
+settings_post_parser.add_argument('settings', required=True, type=dict)
 
 user_fields = {"id": fields.Integer, "name": fields.String, "email": fields.String}
-
 
 MOCK_NODES = [{"id": 1,
                   "protocol_version": 2.0,
@@ -88,7 +93,7 @@ class ApiSensor(Resource):
 
     @auth.jwt_required
     def put(self, node_id, sensor_id):
-        args = parser.parse_args()
+        args = login_parser.parse_args()
         # print("{};{};1;0;{};{}".format(node_id,sensor_id,args['variable'],args['value']))
         app.gateway.set_child_value(node_id, sensor_id, args['variable'], args['value'])
 
@@ -98,7 +103,18 @@ class ApiSensor(Resource):
 class ApiSettings(Resource):
     @auth.jwt_required
     def get(self):
-        return {'gateway': {"port": "/dev/ttyACM0"}}
+        list_settings = Settings.query.all()
+        list_settings = {s.module.name: json.loads(s.settings) for s in list_settings}
+        return list_settings
+
+    @auth.jwt_required
+    def put(self):
+        args = settings_post_parser.parse_args()
+        print(args)
+        settings = Settings.query.filter(Module.name == args['module']).first()
+        settings.settings = json.dumps(args['settings'])
+        db.session.add(settings)
+        db.session.commit()
 
 
 class ApiStatus(Resource):
@@ -109,13 +125,14 @@ class ApiStatus(Resource):
 
 class ApiAuth(Resource):
     def post(self):
-        args = parser.parse_args()
+        args = login_parser.parse_args()
         user = User.query.filter(User.email==args.username).first()
         if user and args.password == user.password:
             auth_token = auth.encode_auth_token(user.id)
             return {'auth_token': auth_token.decode('utf-8')}
         else:
             return {'message': "Unauthorized"}, 401
+
 
 class ApiUserMe(Resource):
     @auth.jwt_required

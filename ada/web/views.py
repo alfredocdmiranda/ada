@@ -1,5 +1,5 @@
 import requests
-from flask import render_template, flash, redirect, url_for, g
+from flask import render_template, flash, redirect, url_for, g, request
 from flask_login import login_user, logout_user, current_user, login_required, UserMixin
 
 from web import app, forms, login_manager
@@ -37,11 +37,20 @@ def unauthorized_callback():
 def before_request():
     g.user = current_user
 
+
 def get_api_request(url):
     headers = {"Authentication": "JWT " + g.user.token}
     r = requests.get(url, verify=False, headers=headers)
 
     return r.json()
+
+
+def put_api_request(url, data):
+    headers = {"Authentication": "JWT " + g.user.token}
+    r = requests.put(url, verify=False, headers=headers, json=data)
+
+    return r.json()
+
 
 @app.route("/", methods=['GET'])
 @login_required
@@ -64,8 +73,22 @@ def nodes():
 @app.route("/settings", methods=['GET'])
 @login_required
 def settings():
+    url = "https://localhost:5001/settings"
+    resp = get_api_request(url)
     view = 'settings'
-    return render_template("settings.html", view=view)
+    return render_template("settings.html", view=view, settings=resp)
+
+
+@app.route("/settings/<_module>", methods=['POST'])
+@login_required
+def settings_update(_module):
+    data = {'module': _module, 'settings': {}}
+    for f in request.form:
+        if not f == 'csrf_token':
+            data['settings'][f] = request.form[f]
+    url = "https://localhost:5001/settings"
+    resp = put_api_request(url, data)
+    return redirect('/settings')
 
 
 @app.route("/status", methods=['GET'])

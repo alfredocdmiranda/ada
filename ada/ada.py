@@ -4,7 +4,7 @@ import threading
 import yaml
 from OpenSSL import crypto
 
-import web, api
+import web, api, drivers
 
 SCRIPT_PATH = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_SQLITE_DB = os.path.join(SCRIPT_PATH, "ada.db")
@@ -14,6 +14,7 @@ SETTINGS_FILE = os.path.join(SCRIPT_PATH, "settings.yaml")
 class Ada(object):
     def __init__(self):
         self.config = self.load_settings()
+        self.modules = []
 
     @staticmethod
     def load_settings():
@@ -30,6 +31,17 @@ class Ada(object):
         settings['root'] = os.path.dirname(os.path.abspath(__file__))
 
         return settings
+
+
+class Module(object):
+    def __init__(self, name, target, kwargs=None):
+        self.name = name
+        self.target = target
+        self.kwargs = kwargs
+
+    def start(self):
+        self.thread = threading.Thread(target=self.target, kwargs=self.kwargs)
+        self.thread.start()
 
 
 def gen_certificate(cert_file, key_file):
@@ -79,10 +91,16 @@ def bootstrap(ada):
 if __name__ == '__main__':
     ada = Ada()
     bootstrap(ada)
+    ada.db = api.db
+
     context = ('ada.crt', 'ada.key')
     kwargs = {'host': "0.0.0.0", 'port': 5000, 'ssl_context': context, 'threaded': True}
-    web_app = threading.Thread(target=web.app.run, kwargs=kwargs)
-    web_app.start()
+    ada.modules.append(Module("Web", web.app.run, kwargs))
     kwargs = {'host': "0.0.0.0", 'port': 5001, 'ssl_context': context, 'threaded': True}
-    web_api = f = threading.Thread(target=api.app.run, kwargs=kwargs)
-    web_api.start()
+    ada.modules.append(Module("Api", api.app.run, kwargs))
+    d = drivers.DriverLoader(ada)
+    d.load_drivers()
+    d.start()
+
+    for m in ada.modules:
+        m.start()
