@@ -94,8 +94,10 @@ def settings_update(_module):
 @app.route("/status", methods=['GET'])
 @login_required
 def status():
+    url = "https://localhost:5001/status"
+    resp = get_api_request(url)
     view = 'status'
-    return render_template("status.html", view=view)
+    return render_template("status.html", view=view, info=resp)
 
 
 @app.route("/login", methods=['GET', 'POST'])

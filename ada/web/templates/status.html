@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block title %}
+System Status
+{% endblock %}
+
 {% block content %}
 <!-- Content Header (Page header) -->
 <section class="content-header">
@@ -25,11 +29,11 @@
         <div class="box-body">
           <dl class="dl-horizontal">
             <dt>Operating System</dt>
-            <dd>Linux</dd>
+            <dd>{{ info['server']['platform'] }}</dd>
             <dt>Archtecture</dt>
-            <dd>amd64</dd>
-            <dt>Version/Kernel</dt>
-            <dd>2.6.32-573.12.1.el6.x86_64</dd>
+            <dd>{{ info['server']['arch'] }}</dd>
+            <dt>Kernel Version</dt>
+            <dd>{{ info['server']['release'] }}</dd>
           </dl>
         </div>
         <!-- /.box-footer -->
@@ -42,7 +46,7 @@
         <div class="box-body">
           <dl class="dl-horizontal">
             <dt>Version</dt>
-            <dd>0.0.1</dd>
+            <dd>{{ info['ada']['version'] }}</dd>
           </dl>
         </div>
         <!-- /.box-footer -->
@@ -50,9 +54,15 @@
     </div>
     <div class="col-lg-3 col-xs-6">
       <!-- small box -->
-      <div class="small-box bg-orange">
+      {% if info['server']['temperature'] < 70 %}
+        <div class="small-box bg-blue">
+      {% elif info['server']['temperature'] < 90 %}
+        <div class="small-box bg-orange">
+      {% else %}
+        <div class="small-box bg-red">
+      {% endif %}
         <div class="inner">
-          <h3>63°C</h3>
+          <h3>{{ info['server']['temperature'] }}</h3>
           <p>Server Temperature</p>
         </div>
         <div class="icon">
@@ -61,9 +71,15 @@
         <!--<a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>-->
       </div>
       <!-- small box -->
-      <div class="small-box bg-red">
+      {% if info['server']['disk_usage'] < 50 %}
+        <div class="small-box bg-green">
+      {% elif info['server']['disk_usage'] < 90 %}
+        <div class="small-box bg-orange">
+      {% else %}
+        <div class="small-box bg-red">
+      {% endif %}
         <div class="inner">
-          <h3>90%</h3>
+          <h3>{{ info['server']['disk_usage'] }}%</h3>
           <p>Usage Disk Space</p>
         </div>
         <div class="icon">

@@ -120,7 +120,12 @@ class ApiSettings(Resource):
 class ApiStatus(Resource):
     @auth.jwt_required
     def get(self):
-        return {'server': {'temperature': 60, 'disk_usage': 90}}
+        data = app.ada.sys_monitor
+        system = {'server': {'temperature': data.temperature.current, 'disk_usage': data.disk_usage,
+                             'platform': data.sys_info.system, 'arch': data.sys_info.machine, 'release': data.sys_info.release},
+                  'ada': {'version': "0.1.0"}}
+
+        return system
 
 
 class ApiAuth(Resource):
