@@ -27,8 +27,9 @@ Dashboard
 </script>
 <script src="{{ url_for('static', filename='cards.js') }}"></script>
 <script>
-  nodes = {{ nodes|tojson|safe }}
+  var csrf_token = "{{ csrf_token() }}";
+  var nodes = {{ nodes|tojson|safe }}
   build_dashboard(nodes);
-  load_bootstrapSwitch();
+  load_bootstrapSwitch(csrf_token);
 </script>
 {% endblock %}
