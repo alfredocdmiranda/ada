@@ -44,8 +44,9 @@ var build_box_body = function(node){
   box_body_row_col.setAttribute("class", "col-md-12 col-sm-9");
   box_body_row.appendChild(box_body_row_col);
 
-  for(index_sensors=0;index_sensors < node['sensors'].length;index_sensors++){
-    smallbox = build_smallbox(node['sensors'][index_sensors], node['id']);
+  //for(index_sensors=0;index_sensors < node['sensors'].length;index_sensors++){
+  for(var key in node['sensors']){
+    smallbox = build_smallbox(node['sensors'][key], node['id']);
     box_body_row_col.appendChild(smallbox);
   }
 
@@ -95,6 +96,8 @@ var smallbox_light_switch = function(sensor, node_id){
   var light_switch = document.createElement("input");
   light_switch.setAttribute("type", "checkbox");
   light_switch.setAttribute("name", "my-checkbox");
+  console.log("SENSOR")
+  console.log(sensor)
   if(sensor['values']['2'] == 1){
     light_switch.setAttribute("checked", "");
   }
@@ -184,7 +187,7 @@ var smallbox_funcs = {
   6: smallbox_temperature
 }
 
-var load_bootstrapSwitch = function(){
+var load_bootstrapSwitch = function(csrf_token){
   $("[name='my-checkbox']").bootstrapSwitch();
   $('[name="my-checkbox"]').on('switchChange.bootstrapSwitch', function(event, state) {
     node_id = this.getAttribute("data-node-id");
@@ -194,9 +197,15 @@ var load_bootstrapSwitch = function(){
 
     var ajaxReq = $.ajax({
                 method: "PUT",
-                dataType: 'json',
+                //dataType: 'json',
                 url: "/api/nodes/"+node_id+"/sensors/"+sensor_id,
-                data: { variable: variable, value: value}
+                data: {"variable": variable, "value": value},
+
+                beforeSend: function(xhr, settings) {
+                    if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrf_token);
+                    }
+                }
               });
     ajaxReq.done(function(msg){
               console.log(msg);
