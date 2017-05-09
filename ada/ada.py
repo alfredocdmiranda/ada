@@ -99,9 +99,9 @@ if __name__ == '__main__':
     kwargs = {'host': "0.0.0.0", 'port': 5001, 'ssl_context': context, 'threaded': True}
     ada.modules.append(Module("Api", api.app.run, kwargs))
 
-    d = drivers.DriverLoader(ada)
-    d.load_drivers()
-    d.start()
+    ada.loader = drivers.DriverLoader(ada)
+    ada.loader.load_drivers()
+    ada.loader.start()
 
     ada.sys_monitor = system_monitor.SystemMonitor(ada)
 
