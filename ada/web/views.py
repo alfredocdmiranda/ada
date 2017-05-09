@@ -1,8 +1,8 @@
 import requests
-from flask import render_template, flash, redirect, url_for, g, request
+from flask import render_template, flash, redirect, url_for, g, request, jsonify
 from flask_login import login_user, logout_user, current_user, login_required, UserMixin
 
-from web import app, forms, login_manager
+from web import app, forms, login_manager, csrf
 
 
 class User(UserMixin):
@@ -127,3 +127,16 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for("login"))
+
+
+@app.route("/api/nodes/<node_id>/sensors/<sensor_id>", methods=['PUT'])
+@login_required
+def set_sensor_value(node_id, sensor_id):
+    url = "https://localhost:5001/nodes/{0}/sensors/{1}".format(node_id, sensor_id)
+    data = {}
+    for f in request.form:
+        data[f] = request.form[f]
+
+    resp = put_api_request(url, data)
+
+    return jsonify({})
