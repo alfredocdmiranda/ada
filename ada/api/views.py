@@ -13,6 +13,10 @@ settings_post_parser = reqparse.RequestParser()
 settings_post_parser.add_argument('module', required=True, type=str)
 settings_post_parser.add_argument('settings', required=True, type=dict)
 
+sensor_put_parser = reqparse.RequestParser()
+sensor_put_parser.add_argument('variable', required=True, type=int)
+sensor_put_parser.add_argument('value', required=True, type=float)
+
 user_fields = {"id": fields.Integer, "name": fields.String, "email": fields.String}
 
 MOCK_NODES = [{"id": 1,
@@ -47,10 +51,37 @@ MOCK_NODES = [{"id": 1,
                   }]
 
 
+def jsonify_nodes(entities):
+    nodes = {}
+    for e in entities:
+        if e.node_id not in nodes:
+            nodes[e.node_id] = {}
+            nodes[e.node_id]['id'] = e.node_id
+            nodes[e.node_id]['battery_level'] = e.battery_level
+            nodes[e.node_id]['sketch_name'] = e.sketch_name
+            nodes[e.node_id]['sketch_version'] = e.sketch_version
+            nodes[e.node_id]['protocol_version'] = e.protocol_version
+            nodes[e.node_id]['type'] = 17
+            nodes[e.node_id]['sensors'] = {}
+
+        nodes[e.node_id]['sensors'][e.child_id] = {
+            "id": e.child_id,
+            "description": "",
+            "type": e.type,
+            "values": {}
+        }
+
+        for v in e.values:
+            nodes[e.node_id]['sensors'][e.child_id]['values'][v] = e.values[v]
+
+    return list(nodes.values())
+
+
 class ApiNodesList(Resource):
     @auth.jwt_required
     def get(self):
-        nodes = MOCK_NODES
+        e = app.ada.loader.get_entities(module='mysensors')
+        nodes = jsonify_nodes(e)
 
         return nodes
 
@@ -58,46 +89,47 @@ class ApiNodesList(Resource):
 class ApiNode(Resource):
     @auth.jwt_required
     def get(self, node_id):
-        if node_id == 1:
-            node = MOCK_NODES[0]
+        e = app.ada.loader.get_entities(module='mysensors', node_id=node_id)
+        if e:
+            node = jsonify_nodes(e)[0]
         else:
-            node = MOCK_NODES[1]
+            node = {}
+
         return node
 
 
 class ApiSensorsList(Resource):
     @auth.jwt_required
     def get(self, node_id):
-        if node_id == 1:
-            node = MOCK_NODES[0]
+        e = app.ada.loader.get_entities(module='mysensors', node_id=node_id)
+        if e:
+            sensors = jsonify_nodes(e)[0]['sensors']
         else:
-            node = MOCK_NODES[1]
+            sensors = {}
 
-        return node['sensors']
+        return sensors
 
 
 class ApiSensor(Resource):
     @auth.jwt_required
     def get(self, node_id, sensor_id):
-        if node_id == 1:
-            node = MOCK_NODES[0]
+        e = app.ada.loader.get_entities(module='mysensors', node_id=node_id, child_id=sensor_id)
+        if e:
+            sensor = jsonify_nodes(e)[0]['sensors'][sensor_id]
         else:
-            node = MOCK_NODES[1]
-
-        if sensor_id == 1:
-            sensor = node['sensors'][0]
-        else:
-            sensor = node['sensors'][1]
+            sensor = {}
 
         return sensor
 
     @auth.jwt_required
     def put(self, node_id, sensor_id):
-        args = login_parser.parse_args()
-        # print("{};{};1;0;{};{}".format(node_id,sensor_id,args['variable'],args['value']))
-        app.gateway.set_child_value(node_id, sensor_id, args['variable'], args['value'])
+        args = sensor_put_parser.parse_args()
+        e = app.ada.loader.get_entities(module='mysensors', node_id=node_id, child_id=sensor_id)
+        if e:
+            entity = e[0]
+            entity.update_value(args['variable'], args['value'])
 
-        return
+        return {}
 
 
 class ApiSettings(Resource):
@@ -110,7 +142,6 @@ class ApiSettings(Resource):
     @auth.jwt_required
     def put(self):
         args = settings_post_parser.parse_args()
-        print(args)
         settings = Settings.query.filter(Module.name == args['module']).first()
         settings.settings = json.dumps(args['settings'])
         db.session.add(settings)
