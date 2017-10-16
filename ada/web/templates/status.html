@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}
+System Status
+{% endblock %}
+
+{% block content %}
+<!-- Content Header (Page header) -->
+<section class="content-header">
+  <h1>
+    Status
+    <!--<small>Optional description</small>-->
+  </h1>
+  <!--<ol class="breadcrumb">
+    <li><a href="#"><i class="fa fa-dashboard"></i> Level</a></li>
+    <li class="active">Here</li>
+  </ol>-->
+</section>
+
+<!-- Main content -->
+<section class="content">
+  <div class="row">
+    <div class="col-lg-6 col-xs-6">
+      <div class="box box-info">
+        <div class="box-header with-border">
+          <h3 class="box-title">System Info</h3>
+        </div>
+        <!-- /.box-header -->
+        <div class="box-body">
+          <dl class="dl-horizontal">
+            <dt>Operating System</dt>
+            <dd>{{ info['server']['platform'] }}</dd>
+            <dt>Archtecture</dt>
+            <dd>{{ info['server']['arch'] }}</dd>
+            <dt>Kernel Version</dt>
+            <dd>{{ info['server']['release'] }}</dd>
+          </dl>
+        </div>
+        <!-- /.box-footer -->
+      </div>
+      <div class="box box-info">
+        <div class="box-header with-border">
+          <h3 class="box-title">ADA Info</h3>
+        </div>
+        <!-- /.box-header -->
+        <div class="box-body">
+          <dl class="dl-horizontal">
+            <dt>Version</dt>
+            <dd>{{ info['ada']['version'] }}</dd>
+          </dl>
+        </div>
+        <!-- /.box-footer -->
+      </div>
+    </div>
+    <div class="col-lg-3 col-xs-6">
+      <!-- small box -->
+      {% if info['server']['temperature'] < 70 %}
+        <div class="small-box bg-blue">
+      {% elif info['server']['temperature'] < 90 %}
+        <div class="small-box bg-orange">
+      {% else %}
+        <div class="small-box bg-red">
+      {% endif %}
+        <div class="inner">
+          <h3>{{ info['server']['temperature'] }}</h3>
+          <p>Server Temperature</p>
+        </div>
+        <div class="icon">
+          <i class="ion ion-thermometer"></i>
+        </div>
+        <!--<a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>-->
+      </div>
+      <!-- small box -->
+      {% if info['server']['disk_usage'] < 50 %}
+        <div class="small-box bg-green">
+      {% elif info['server']['disk_usage'] < 90 %}
+        <div class="small-box bg-orange">
+      {% else %}
+        <div class="small-box bg-red">
+      {% endif %}
+        <div class="inner">
+          <h3>{{ info['server']['disk_usage'] }}%</h3>
+          <p>Usage Disk Space</p>
+        </div>
+        <div class="icon">
+          <i class="ion ion-pie-graph"></i>
+        </div>
+        <!--<a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>-->
+      </div>
+    </div>
+
+  </div>
+</section>
+<!-- /.content -->
+{% endblock %}

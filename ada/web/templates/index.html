@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}
+Dashboard
+{% endblock %}
+
+{% block content %}
+<!-- Content Header (Page header) -->
+<section class="content-header">
+  <h1>
+    Dashboard
+    <!--<small>Optional description</small>-->
+  </h1>
+</section>
+
+<!-- Main content -->
+<section class="content">
+  <!-- Main row -->
+  <div id="main-row" class="row"></div>
+</section>
+<!-- /.content -->
+{% endblock %}
+
+{% block js %}
+<script>
+  $("[name='my-checkbox']").bootstrapSwitch();
+</script>
+<script src="{{ url_for('static', filename='cards.js') }}"></script>
+<script>
+  var csrf_token = "{{ csrf_token() }}";
+  var nodes = {{ nodes|tojson|safe }}
+  build_dashboard(nodes);
+  load_bootstrapSwitch(csrf_token);
+</script>
+{% endblock %}

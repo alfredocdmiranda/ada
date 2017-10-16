@@ -1,0 +1,13 @@
+flask
+flask_cors
+flask_login
+flask_wtf
+flask_restful
+flask_sqlalchemy
+influxdb
+influxalchemy
+psutil
+pyjwt
+pyopenssl
+PyYAML
+git+https://github.com/theolind/pymysensors
